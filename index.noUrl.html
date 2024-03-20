@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>购物车（noUrl）</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="./styles/style1.css">
+    <link rel="stylesheet" href="./styles/header.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="shopping.html">初版</a></li>
+                <li><a href="shoppingBookstrap.html">初版（Bookstrap）</a></li>
+                <li><a href="index.simple.html">完整版</a></li>
+                <li>完整版（noUrl）</li>
+                <li><a href="index.html">加强版</a></li>
+                
+            </ul>
+        </nav>
+    </header>
+    <div id="app">
+        <template v-if="list.length">
+            <table v-for="(store, storeIndex) in list" :key="storeIndex">
+                <thead>
+                    <th>
+                        <input type="checkbox" v-model="store.isStoreSelected" @change="selectStore(storeIndex)" @click="selectStore(storeIndex)">
+                        <a :href="store.StoreUrl" target="_blank">{{store.StoreName}}</a>
+                    </th>
+                    <th>序号</th>
+                    <th>商品名称</th>
+                    <th>商品价格</th>
+                    <th>商品数量</th>
+                    <th>操作</th>
+                </thead>
+                <tbody>
+                    <tr v-for="(product, productIndex) in store.products" :key="productIndex">
+                        <td><input type="checkbox" v-model="product.isSelected" @click="selectProduct(storeIndex, productIndex)"></td>
+                        <td>{{ product.id }}</td>
+                        <td><a :href="product.ProductUrl" target="_blank">{{ product.name }}</a></td>
+                        <td>￥{{ product.price }}</td>
+                        <td>
+                            <button @click="reduceCount(storeIndex, productIndex)"
+                                :disabled="product.count === 1">-</button>
+                            &nbsp;&nbsp;{{ product.count }}&nbsp;&nbsp;
+                            <button @click="addCount(storeIndex, productIndex)">+</button>
+                        </td>
+                        <td><button @click="delGoods(storeIndex, productIndex)">删除</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="isSelectedAll"><input type="checkBox" :checked="isSelectedAll()" @click="selectAll">全选</div>
+            <div class="total-price">总价：<span>￥{{ totalPrice }}</span>
+        </template>
+        <div v-else="list.length==0" class="empty-cart">购物车已清空</div>
+    </div>
+    <script>
+        const RootComp = {
+            data() {
+                return {
+                    list: [
+                        {
+                            storeID: 1,
+                            StoreName: 'HUAWEI',
+                            isStoreSelected: false,
+                            products: [
+                                { id: 1, isSelected: false, name: 'HUAWEI Mate60',price: 5999, count: 1 },
+                                { id: 2, isSelected: false, name: 'HUAWEI Mate60 Pro',  price: 6999, count: 1 },
+                                { id: 3, isSelected: false, name: 'HUAWEI Mate60 Pro+',  price: 9999, count: 1 },
+                                { id: 4, isSelected: false, name: 'HUAWEI Mate 60 RS 非凡大师',  price: 11999, count: 1 }
+                            ]
+                        },
+                        {
+                            storeID: 2,
+                            StoreName: 'HONOR',
+                            isStoreSelected: false,
+                            products: [
+                                { id: 1, isSelected: false, name: 'HONOR Magic6',  price: 4399, count: 1 },
+                                { id: 2, isSelected: false, name: 'HONOR Magic6 Pro', price: 5699, count: 1 },
+                                { id: 3, isSelected: false, name: 'HONOR Magic6 至臻版', price: 6999, count: 1 },
+                                { id: 4, isSelected: false, name: 'HONOR Magic6 RSR 保时捷设计',  price: 9999, count: 1 }
+                            ]
+                        }
+                    ]
+                }
+            },
+            computed: {
+                totalPrice() {
+                    let total = 0
+                    for (const store of this.list) {
+                        for (const product of store.products) {
+                            if (product.isSelected) {
+                                total += product.price * product.count
+                            }
+                        }
+                    }
+                    return total
+                }
+            },
+            methods: {
+                // 删除商品
+                delGoods(storeIndex, productIndex) {
+                    this.list[storeIndex].products.splice(productIndex, 1)
+                    if (this.list[storeIndex].products.length === 0)
+                        this.list.splice(storeIndex, 1)
+                },
+                // 减少商品数量
+                reduceCount(storeIndex, productIndex) {
+                    if (this.list[storeIndex].products[productIndex].count === 1)
+                        return
+                    this.list[storeIndex].products[productIndex].count--
+                },
+                // 增加商品数量
+                addCount(storeIndex, productIndex) {
+                    this.list[storeIndex].products[productIndex].count++
+                },
+                // 全选/取消全选
+                selectAll() {
+                    const flag = !this.isSelectedAll()
+                    for (const store of this.list) {
+                        store.isStoreSelected = flag
+                        for (const product of store.products) {
+                            product.isSelected = flag
+                        }
+                    }
+                },
+                // 是否全选
+                isSelectedAll() {
+                    for (const store of this.list) {
+                        for (const product of store.products) {
+                            if (!product.isSelected) {
+                                return false
+                            }
+                        }
+                    }
+                    return true
+                },
+                // 选择商店
+                selectStore(storeIndex) {
+                    const store = this.list[storeIndex]
+                    const isSelected = store.isStoreSelected
+                    for (const product of store.products) {
+                        product.isSelected = isSelected
+                    }
+                },
+                // 选择商品
+                selectProduct(storeIndex, productIndex) {
+                    this.list[storeIndex].products[productIndex].isSelected = !this.list[storeIndex].products[productIndex].isSelected
+                    // 检查是否所有商品都被选中
+                    let allProductsSelected = true
+                    for (const product of this.list[storeIndex].products) {
+                        if (!product.isSelected) {
+                            allProductsSelected = false
+                            break
+                        }
+                    }
+                    // 如果所有商品都被选中，则勾选商店复选框
+                    this.list[storeIndex].isStoreSelected = allProductsSelected
+                }
+            }
+        }
+        // 创建vue应用的根组件
+        const vueApp = Vue.createApp(RootComp)
+        // 挂载处理
+        const vuemodle = vueApp.mount('#app')
+    </script>
+</body>
+
+</html>

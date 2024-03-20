@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>购物车（初版Boostrap）</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/header.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="shopping.html">初版</a></li>
+                <li>初版（Bookstrap）</li>
+                <li><a href="index.simple.html">完整版</a></li>
+                <li><a href="index.noUrl.html">完整版（noUrl）</a></li>
+                <li><a href="index.html">加强版</a></li>
+
+            </ul>
+        </nav>
+    </header>
+    <div id="app" class="container">
+        <template v-if="list.length">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th><input type="checkBox" :checked="isSelectedAll()" @click="selectAll">全选</th>
+                            <th>序号</th>
+                            <th>商品名称</th>
+                            <th>商品价格</th>
+                            <th>商品数量</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,index) in list" :key="index">
+                            <td><input type="checkBox" :checked="item.isSelected" @click="selectOne(index)"></td>
+                            <td>{{item.id}}</td>
+                            <td>{{item.name}}</td>
+                            <td>{{item.price}}</td>
+                            <td><button @click="reduceCount(index)"
+                                    :disabled="item.count ===1" class="btn btn-secondary">-</button>&nbsp;&nbsp;{{item.count}}&nbsp;&nbsp;<button
+                                    @click="addCount(index)" class="btn btn-secondary">+</button></td>
+                            <td><button @click="delGoods(index)" class="btn btn-danger">删除</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="total-price">总价：￥{{totalPrice}}</div>
+        </template>
+        <div class="empty-cart" v-else="list.length==0">购物车已清空</div>
+    </div>
+    <script>
+        const RootComp = {
+            data() {
+                return {
+                    list: [
+                        {
+                            isSelected: true,
+                            id: 1,
+                            name: 'Huawei Mate60',
+                            price: 5499,
+                            count: 1
+                        },
+                        {
+                            isSelected: true,
+                            id: 2,
+                            name: 'Huawei Mate60 Pro',
+                            price: 6999,
+                            count: 1
+                        },
+                        {
+                            isSelected: true,
+                            id: 3,
+                            name: 'Huawei Mate60 Pro+',
+                            price: 9999,
+                            count: 1
+                        }
+                    ]
+                }
+            },
+            computed: {
+                totalPrice() {
+                    let total = 0
+                    for (let i = 0; i < this.list.length; i++) {
+                        let item = this.list[i]
+                        if (item.isSelected)
+                            total += item.price * item.count
+                    }
+                    return total
+                }
+            },
+            methods: {
+                delGoods(index) {
+                    this.list.splice(index, 1)
+                },
+                reduceCount(index) {
+                    if (this.list[index].count === 1)
+                        return;
+                    this.list[index].count--
+                },
+                addCount(index) {
+                    this.list[index].count++
+                },
+                selectOne(index) {
+                    this.list[index].isSelected = !this.list[index].isSelected
+                },
+                isSelectedAll() {
+                    for (const item of this.list) {
+                        if (!item.isSelected) {
+                            return false
+                        }
+                    }
+                    return true;
+                },
+                selectAll() {
+                    const flag = !this.isSelectedAll();
+                    for (const item of this.list) {
+                        item.isSelected = flag
+                    }
+                }
+                // //使用 every() 方法来简化这个检查
+                // isSelectedAll() {
+                //     return this.list.every(item => item.isSelected)
+                // },
+                // selectAll() {
+                //     const flag = !this.isSelectedAll()
+                //     for (const item of this.list) {
+                //         item.isSelected = flag;
+                //     }
+                // }
+            }
+        }
+        // 创建vue应用的根组件
+        const vueApp = Vue.createApp(RootComp)
+        // 挂载处理
+        const vuemodle = vueApp.mount('#app')
+    </script>
+</body>
+
+</html>
